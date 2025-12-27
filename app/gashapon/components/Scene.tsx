@@ -6,37 +6,59 @@ import { Physics, RigidBody } from "@react-three/rapier";
 import { useState } from "react";
 import GashaponMachine from "./GashaponMachine";
 import GashaponBall from "./GashaponBall";
+import PrizeDisplay from "./PrizeDisplay";
+import { usePrizeSystem } from "../hooks/usePrizeSystem";
+import { Prize, RARITY_COLORS } from "../types/prize";
 
 export default function Scene() {
+  const { draw } = usePrizeSystem();
   const [balls, setBalls] = useState<
-    Array<{ id: number; color: string; position: [number, number, number] }>
+    Array<{
+      id: number;
+      color: string;
+      position: [number, number, number];
+      prize: Prize;
+    }>
   >([]);
+  const [selectedPrize, setSelectedPrize] = useState<Prize | null>(null);
 
   const handleGachapon = () => {
-    const colors = ["#ff6b6b", "#4ecdc4", "#45b7d1", "#f9ca24", "#6c5ce7"];
-    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    // 抽奖
+    const prize = draw();
+    if (!prize) return;
+
+    // 根据稀有度设置颜色
+    const color = RARITY_COLORS[prize.rarity];
+
     const newBall = {
       id: Date.now(),
-      color: randomColor,
+      color: color,
       position: [1.75, 1.2, 0] as [number, number, number],
+      prize: prize,
     };
     setBalls((prev) => [...prev, newBall]);
   };
 
   const handleBallClick = (id: number) => {
-    console.log("Ball clicked:", id);
-    // 后续可以添加开蛋动画
+    // 找到被点击的球
+    const ball = balls.find((b) => b.id === id);
+    if (ball) {
+      setSelectedPrize(ball.prize);
+      // 移除这个球
+      setBalls((prev) => prev.filter((b) => b.id !== id));
+    }
   };
 
   return (
-    <Canvas
-      camera={{
-        position: [3, 2.5, 5],
-        fov: 50,
-      }}
-      shadows
-      className="w-full h-full"
-    >
+    <>
+      <Canvas
+        camera={{
+          position: [3, 2.5, 5],
+          fov: 50,
+        }}
+        shadows
+        className="w-full h-full"
+      >
       {/* 環境光 */}
       <ambientLight intensity={0.5} />
 
@@ -90,15 +112,32 @@ export default function Scene() {
         maxPolarAngle={Math.PI / 2}
       />
 
-      {/* UI 按钮 */}
-      <Html position={[0, 4, 0]} center>
+      </Canvas>
+
+      {/* UI 控制区 */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-4">
         <button
           onClick={handleGachapon}
-          className="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200"
+          className="group relative px-12 py-5 bg-gradient-to-b from-red-500 to-red-700 text-white text-2xl font-black rounded-full shadow-2xl hover:shadow-red-500/50 hover:scale-105 transition-all duration-300 border-4 border-yellow-400"
+          style={{
+            textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+            boxShadow: '0 10px 30px rgba(220, 38, 38, 0.6), inset 0 -4px 8px rgba(0,0,0,0.3)',
+          }}
         >
-          抽扭蛋
+          <span className="relative z-10 tracking-wider">🎰 抽扭蛋 🎰</span>
+          <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/20 rounded-full"></div>
         </button>
-      </Html>
-    </Canvas>
+
+        <div className="text-white/70 text-sm">
+          点击扭蛋球查看奖品
+        </div>
+      </div>
+
+      {/* 奖项展示弹窗 */}
+      <PrizeDisplay
+        prize={selectedPrize}
+        onClose={() => setSelectedPrize(null)}
+      />
+    </>
   );
 }
