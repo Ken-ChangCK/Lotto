@@ -1,18 +1,18 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata } from 'next';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: "扭蛋機 - Gashapon",
-  description: "基於 Three.js 打造的精美 3D 扭蛋機",
+  title: '扭蛋机 - Gashapon',
+  description: '互动式 3D 扭蛋机应用',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="zh-TW">
+    <html lang="zh-CN">
       <body>{children}</body>
     </html>
   );
