@@ -2,12 +2,13 @@
 
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
+import GashaponMachine from "./GashaponMachine";
 
 export default function Scene() {
   return (
     <Canvas
       camera={{
-        position: [0, 2, 5],
+        position: [3, 2.5, 5],
         fov: 50,
       }}
       shadows
@@ -28,11 +29,8 @@ export default function Scene() {
       {/* 點光源 */}
       <pointLight position={[-5, 5, -5]} intensity={0.5} />
 
-      {/* 測試立方體 */}
-      <mesh position={[0, 1, 0]} castShadow>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="#8b5cf6" />
-      </mesh>
+      {/* 扭蛋機 */}
+      <GashaponMachine />
 
       {/* 地面 */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
